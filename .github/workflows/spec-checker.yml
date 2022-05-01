@@ -1,0 +1,77 @@
+#
+# Copyright (c) 2019-2021 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# File: .github/workflows/update-checker.yml
+# Description: Source code update checker
+#
+
+name: Specification Checker
+
+env:
+  TZ: Asia/Taipei
+
+on:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: "SSH connection to Actions"
+        required: false
+        default: "false"
+
+jobs:
+  specChecker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install cpuid hwinfo dmidecode
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+
+      - name: Check disk space usage
+        if: (!cancelled())
+        run: df -hT
+
+      - name: Detect CPU info 01
+        if: (!cancelled())
+        run: lscpu
+
+      - name: Detect CPU info 02
+        if: (!cancelled())
+        run: cpuid
+
+      - name: Detect CPU info 03
+        if: (!cancelled())
+        run: hwinfo --cpu
+
+      - name: Detect CPU info 04
+        if: (!cancelled())
+        run: sudo dmidecode --type processor
+
+      - name: Detect Memory info 01
+        if: (!cancelled())
+        run: free
+
+      - name: Detect Memory info 02
+        if: (!cancelled())
+        run: sudo dmidecode --type 17
+
+      - name: Detect Memory info 03
+        if: (!cancelled())
+        run: cat /proc/meminfo
+
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 1
