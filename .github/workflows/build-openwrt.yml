@@ -92,12 +92,17 @@ jobs:
           make defconfig
           make download -j8
 
+      - name: List Download packages and dir structure
+        working-directory: ./openwrt
+        run: |
+          ls -lSr dl
+          tree -d -L 2
+          echo -e "List Done!!!"
+
       - name: Compile the firmware
         working-directory: ./openwrt
         id: compile
         run: |
-          ls -lSr dl
-          tree -d -L 2
           echo -e "!!!Use $(nproc) threads to compile!!!"
           make -j$(nproc) V=sw 2>&1 || make -j1 V=sw 2>&1
           echo "::set-output name=status::success"
