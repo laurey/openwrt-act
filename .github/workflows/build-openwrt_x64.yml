@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: Build x64 OpenWrt
+name: Build x86_64_alpha OpenWrt
 
 on:
   repository_dispatch:
@@ -33,7 +33,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout
@@ -57,8 +57,10 @@ jobs:
 
       - name: Load custom feeds
         run: |
+          cat openwrt/feeds.conf.default
           [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
           tree -d -L 2
+          cat openwrt/feeds.conf.default
           chmod +x $DIY_P1_SH
           cd openwrt
           $GITHUB_WORKSPACE/$DIY_P1_SH
@@ -87,12 +89,13 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
-      - name: Download package
-        working-directory: ./openwrt
-        id: package
-        run: |
-          make defconfig
-          make download -j8
+      # - name: Download package
+      #   working-directory: ./openwrt
+      #   id: package
+      #   run: |
+      #     make defconfig
+      #     make download -j8
+
       # find dl -size -1024c -exec ls -l {} \;
       # find dl -size -1024c -exec rm -f {} \;
 
